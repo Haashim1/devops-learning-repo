@@ -1,1 +1,46 @@
+# Networking Project 
+
+Buy a domain, deploy NGINX on an EC2 instance, and make the page load over your own domain.
+
+# Step 1 - Buy a Domain
+
+I used Cloudflare to buy a domain and my domain is h-abdi.co.uk
+
+# Step 2 - Launch an EC2 instance
+
+I launched my EC2 instance and these were the settings I used for my instance: 
+
+- Instance type = t3.micro
+- Created a .pem key
+- SSH (22) allowed
+- HTTP (80) allowed
+- HTTPS (443) allowed
+
+# Step 3 - Connect to the Instance
+
+- My SSH command was : ssh -i ~/Downloads/your-key.pem ubuntu@YOUR_PUBLIC_IP
+  
+- I had to fix key permissions :  chmod 400 ~/Downloads/h-abdi-key.pem
+  
+- Then install NGINX : sudo apt update
+sudo apt install -y nginx
+
+- Then start NGINX and check it : sudo systemctl enable nginx
+sudo systemctl start nginx
+sudo systemctl status nginx
+
+- Then tested it works by testing the public IP : http://PUBLIC_IP_ADDRESS
+
+  # STEP 4 - Connect to my domain
+
+- I created two DNS A records in CloudFlare
+
+
+  # STEP 5 - Test the website
+
+  After creating the two DNS A records it was fully connected and ready to test
+
+  http://www.h-abdi.co.uk and http://h-abdi.co.uk both work
+
+  
 
