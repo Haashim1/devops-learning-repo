@@ -45,6 +45,7 @@ sudo systemctl status nginx
   
 
 
+<img width="1152" height="641" alt="Screenshot 2026-05-11 at 20 35 39" src="https://github.com/user-attachments/assets/cf36f705-132b-42f7-9aab-d19ea6972d10" />
 
 
 
