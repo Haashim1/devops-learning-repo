@@ -1,25 +1,32 @@
 # Application Load Balancer Project
 
-Deploy two EC2 web servers behind an AWS Application Load Balancer and use Security Groups to control traffic between the ALB and EC2 instances.
+I built an AWS project using two EC2 instances behind an Application Load Balancer.
+
+The two web servers run Apache and return different messages so I can see which instance is receiving traffic.
+
+## Setup
+
+* 2 × EC2 instances (`t3.micro`)
+* Amazon Linux
+* Apache
+* Same VPC
+* Different Availability Zones
+* Application Load Balancer
+* Target Group
+* Security Groups
+* HTTP on port 80
 
 ---
 
-# Step 1 - Launch Two EC2 Instances
+## Step 1 - Launch Two EC2 Instances
 
 I launched two EC2 instances in the same VPC.
 
-I used:
-
-* Instance 1: WebServer-1
-* Instance 2: WebServer-2
-* Instance type: t3.micro
-* Amazon Linux
-* Apache web server
-* Different Availability Zones where possible
-
-Each server displays different content so I can identify which EC2 instance is handling the request.
+I placed the instances in different Availability Zones where possible.
 
 ### WebServer-1
+
+I used the following User Data to install Apache and create a simple web page:
 
 ```bash
 #!/bin/bash
@@ -35,6 +42,8 @@ echo "<h1>Hello from WebServer-1</h1>" > /var/www/html/index.html
 
 ### WebServer-2
 
+The second instance uses similar User Data but returns a different message:
+
 ```bash
 #!/bin/bash
 
@@ -47,62 +56,50 @@ systemctl start httpd
 echo "<h1>Hello from WebServer-2</h1>" > /var/www/html/index.html
 ```
 
+The different messages make it easy to see which EC2 instance is receiving traffic.
 
-<img width="1437" height="721" alt="aws_instancesrunning" src="https://github.com/user-attachments/assets/9f341944-662a-4b12-8d59-ecb0f07b2397" />
+<img width="1437" height="721" alt="aws_instancesrunning" src="https://github.com/user-attachments/assets/6d5712ca-4f75-48ca-a33e-67015ec8a578" />
 
 
 ---
 
-# Step 2 - Create the ALB Security Group
+## Step 2 - Create the ALB Security Group
 
 I created a Security Group for the Application Load Balancer.
 
-The inbound rule allows HTTP traffic from the internet.
+The ALB Security Group allows HTTP traffic from the internet.
 
 | Type | Port | Source      |
 | ---- | ---: | ----------- |
 | HTTP |   80 | `0.0.0.0/0` |
 
+This allows users to access the Application Load Balancer over HTTP.
 
-<img width="1431" height="717" alt="aws_albsg" src="https://github.com/user-attachments/assets/0858ec7d-d76a-4207-86d4-8a299b2ee50e" />
-
+<img width="1431" height="717" alt="aws_albsg" src="https://github.com/user-attachments/assets/6bf72655-af59-454f-bc39-20295146a01f" />
 
 ---
 
-# Step 3 - Create the EC2 Security Group
+## Step 3 - Create the EC2 Security Group
 
 I created a separate Security Group for the EC2 instances.
 
-The EC2 instances do not allow HTTP traffic directly from the internet.
-
-The inbound rule allows HTTP traffic only from the ALB Security Group.
+The EC2 Security Group only allows HTTP traffic from the ALB Security Group.
 
 | Type | Port | Source             |
 | ---- | ---: | ------------------ |
 | HTTP |   80 | ALB Security Group |
 
-The traffic flow is:
+This keeps the EC2 instances from being directly accessible over HTTP from the internet.
 
-```text
-Internet → ALB → EC2
-```
-
-Instead of:
-
-```text
-Internet → EC2
-```
-
-<img width="1432" height="722" alt="aws_alb_ec2_albsg" src="https://github.com/user-attachments/assets/b7f9ee0d-6503-4ae9-b710-256c1baddf6d" />
-
+<img width="1432" height="722" alt="aws_alb_ec2_albsg" src="https://github.com/user-attachments/assets/1a4fc2af-7172-4f75-8167-6c5f71ed2a1f" />
 
 ---
 
-# Step 4 - Create a Target Group
+## Step 4 - Create a Target Group
 
-I created a Target Group for the two EC2 instances.
+I created an HTTP Target Group for the two EC2 instances.
 
-I used:
+The Target Group configuration was:
 
 * Target type: Instances
 * Protocol: HTTP
@@ -112,179 +109,120 @@ I used:
 
 I then registered both EC2 instances with the Target Group.
 
-```text
-Target Group
-     |
-     +---- WebServer-1
-     |
-     +---- WebServer-2
-```
-
 ---
 
-# Step 5 - Create the Application Load Balancer
+## Step 5 - Create the Application Load Balancer
 
-I created an internet-facing Application Load Balancer.
+I created an **internet-facing Application Load Balancer**.
 
-I used:
+The ALB configuration was:
 
 * Scheme: Internet-facing
 * IP address type: IPv4
 * Listener: HTTP
 * Port: 80
-* Same VPC as the EC2 instances
-* Two public subnets
-* ALB Security Group
+* VPC: Same VPC as the EC2 instances
+* Subnets: Two public subnets
+* Security Group: ALB Security Group
 
-I configured the listener to forward traffic to my Target Group.
-
-```text
-Internet
-    |
-    | HTTP :80
-    v
-Application Load Balancer
-    |
-    v
-Target Group
-   / \
-  /   \
- EC2  EC2
-```
-
-
-<img width="1440" height="900" alt="aws_alb" src="https://github.com/user-attachments/assets/68df25eb-ed8b-4a54-b6aa-e0975a30bd1d" />
+I configured the HTTP listener to forward requests to the EC2 Target Group.
+<img width="1440" height="900" alt="aws_alb" src="https://github.com/user-attachments/assets/c0be8e83-139d-4845-a8b5-12a1b1595e07" />
 
 ---
 
-# Step 6 - Check Target Health
+## Step 6 - Check Target Health
 
-After creating the ALB, I checked the Target Group.
+After creating the ALB, I checked the Target Group to make sure both EC2 instances were healthy.
 
-Both EC2 instances were registered as targets.
-
-The health check uses:
+The health check configuration was:
 
 ```text
-/
+Protocol: HTTP
+Port: 80
+Path: /
 ```
 
-Both instances should show:
+Both EC2 instances registered successfully and showed as **Healthy**.
 
-```text
-Healthy
-```
+If an instance becomes unhealthy, the ALB will stop sending normal traffic to that instance.
 
-<img width="1440" height="900" alt="aws_tg_healthy" src="https://github.com/user-attachments/assets/46f32e43-ac00-4551-8cad-49b39bd64506" />
-
+<img width="1440" height="900" alt="aws_tg_healthy" src="https://github.com/user-attachments/assets/2ab20f82-dd60-4192-a66f-a3f45f103b4d" />
 
 ---
 
-# Step 7 - Test the Application Load Balancer
+## Step 7 - Test the Application Load Balancer
 
-I copied the DNS name provided by AWS for the Application Load Balancer and opened it in my browser.
+I used the ALB DNS name to access the application in a web browser.
 
-Web-ALB-676051393.eu-west-2.elb.amazonaws.com 
-
-The ALB successfully forwarded traffic to my EC2 instances.
-
-The first response showed:
+The response could show:
 
 ```text
 Hello from WebServer-1
 ```
 
-After refreshing the page, I could receive:
+or:
 
 ```text
 Hello from WebServer-2
 ```
 
-This confirmed that the Application Load Balancer was distributing traffic between the two EC2 instances.
+After refreshing the page, the request could be handled by the other EC2 instance.
 
-### Screenshot
+This confirmed that the ALB was forwarding requests to the two EC2 instances.
 
-<img width="1440" height="900" alt="aws_ec2server1" src="https://github.com/user-attachments/assets/c35a3e14-f71c-4e66-88da-3cda78dc63da" />
-<img width="1440" height="900" alt="aws_ec2server2" src="https://github.com/user-attachments/assets/87efcc23-03df-4de4-9148-64dfeb0e7334" />
-
-
----
-
-# Step 8 - Verify Security
-
-The final traffic flow was:
-
-```text
-Internet
-    |
-    v
-Application Load Balancer
-    |
-    v
-Target Group
-   / \
-  /   \
- EC2  EC2
-```
-
-The ALB Security Group allows HTTP traffic from the internet.
-
-The EC2 Security Group only allows HTTP traffic from the ALB Security Group.
-
-This means:
-
-```text
-Internet → ALB → EC2
-```
-
-is allowed.
-
-But:
-
-```text
-Internet → EC2
-```
-
-is not allowed.
+<img width="1440" height="900" alt="aws_ec2server1" src="https://github.com/user-attachments/assets/8951e376-69de-4db8-a5d4-0c9d72ceb0f6" />
+<img width="1440" height="900" alt="aws_ec2server2" src="https://github.com/user-attachments/assets/162ca21a-d13b-4107-9729-d08eb3545c99" />
 
 ---
 
-# Final Result
+## Step 8 - Verify the Security
+
+Step 8 - Verify the Security
+
+The final setup was tested to make sure that all internet traffic goes through the Application Load Balancer.
+
+The ALB allows HTTP traffic from the internet, while the EC2 instances only allow HTTP traffic from the ALB Security Group.
+
+This means users can access the website through the ALB, but they cannot access the EC2 instances directly from the internet.
+
+This provides a more secure setup because the EC2 instances are protected behind the Application Load Balancer.
+
+---
+
+## Result
 
 The project was successfully completed.
 
-I created:
+The final architecture included:
 
 * Two EC2 web servers
-* EC2 instances in different Availability Zones
+* Different Availability Zones
+* Apache web servers
 * An Application Load Balancer
+* An HTTP listener on port 80
 * A Target Group
-* HTTP listener on port 80
 * Health checks
 * ALB Security Group
 * EC2 Security Group
+* Traffic distribution between the two EC2 instances
 
-The ALB successfully distributed traffic between both EC2 instances.
-
----
-
-# What I Learned
-
-This project helped me understand how an Application Load Balancer works with multiple EC2 instances.
-
-I learned how to:
-
-* Create an Application Load Balancer
-* Create a Target Group
-* Register EC2 instances as targets
-* Configure health checks
-* Use Security Groups to control traffic
-* Prevent direct access to EC2 instances
-* Test traffic distribution through the ALB
+The ALB successfully forwarded traffic to the healthy EC2 instances.
 
 ---
 
-# AWS Services Used
+## What I Learned
+
+* Setting up an Application Load Balancer
+* Creating and configuring Target Groups
+* Registering EC2 instances as targets
+* Configuring health checks
+* Using Security Groups between AWS resources
+* Keeping EC2 instances from being directly exposed
+* Testing load balancing across multiple instances
+
+---
+
+## AWS Services
 
 * Amazon EC2
 * Application Load Balancer
@@ -295,11 +233,11 @@ I learned how to:
 
 ---
 
-# Removing resources
+## Removing Resources
 
-After completing the project, I removed the AWS resources to avoid unnecessary charges.
+After testing, I removed the resources to avoid leaving anything running unnecessarily.
 
-* Deleted the Application Load Balancer
+* Deleted the ALB
 * Deleted the Target Group
 * Terminated the EC2 instances
 * Removed unused Security Groups
