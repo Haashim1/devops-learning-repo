@@ -6,7 +6,7 @@ The two web servers run Apache and return different messages so I can see which 
 
 ## Setup
 
-* 2 × EC2 instances (`t3.micro`)
+* 2 × EC2 instances 
 * Amazon Linux
 * Apache
 * Same VPC
