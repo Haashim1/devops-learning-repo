@@ -28,8 +28,8 @@ I placed the instances in different Availability Zones where possible.
 
 I used the following User Data to install Apache and create a simple web page:
 
+```bash
 #!/bin/bash
-
 dnf update -y
 dnf install -y httpd
 
@@ -43,6 +43,7 @@ echo "<h1>Hello from WebServer-1</h1>" > /var/www/html/index.html
 
 The second instance uses similar User Data but returns a different message:
 
+```bash
 #!/bin/bash
 
 dnf update -y
