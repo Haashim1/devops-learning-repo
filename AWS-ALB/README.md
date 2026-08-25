@@ -125,7 +125,6 @@ The ALB configuration was:
 * Security Group: ALB Security Group
 
 I configured the HTTP listener to forward requests to the EC2 Target Group.
-<img width="1440" height="900" alt="aws_alb" src="https://github.com/user-attachments/assets/c0be8e83-139d-4845-a8b5-12a1b1595e07" />
 
 ---
 
