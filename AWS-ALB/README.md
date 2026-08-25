@@ -1,12 +1,12 @@
 # Application Load Balancer Project
 
-I built an AWS project using two EC2 instances behind an Application Load Balancer.
+I completed an AWS project using two EC2 instances behind an Application Load Balancer.
 
 The two web servers run Apache and return different messages so I can see which instance is receiving traffic.
 
 ## Setup
 
-* 2 × EC2 instances 
+* 2 EC2 instances 
 * Amazon Linux
 * Apache
 * Same VPC
@@ -30,6 +30,7 @@ I used the following User Data to install Apache and create a simple web page:
 
 ```bash
 #!/bin/bash
+
 dnf update -y
 dnf install -y httpd
 
@@ -37,7 +38,7 @@ systemctl enable httpd
 systemctl start httpd
 
 echo "<h1>Hello from WebServer-1</h1>" > /var/www/html/index.html
-
+```
 
 ### WebServer-2
 
@@ -53,12 +54,11 @@ systemctl enable httpd
 systemctl start httpd
 
 echo "<h1>Hello from WebServer-2</h1>" > /var/www/html/index.html
-
+```
 
 The different messages make it easy to see which EC2 instance is receiving traffic.
 
-<img width="1437" height="721" alt="aws_instancesrunning" src="https://github.com/user-attachments/assets/6d5712ca-4f75-48ca-a33e-67015ec8a578" />
-
+<img width="1438" height="774" alt="aws_instancesrunning" src="https://github.com/user-attachments/assets/2085f1aa-f550-48f9-8a78-e97b4abb2981" />
 
 ---
 
@@ -68,13 +68,8 @@ I created a Security Group for the Application Load Balancer.
 
 The ALB Security Group allows HTTP traffic from the internet.
 
-| Type | Port | Source      |
-| ---- | ---: | ----------- |
-| HTTP |   80 | `0.0.0.0/0` |
-
 This allows users to access the Application Load Balancer over HTTP.
-
-<img width="1431" height="717" alt="aws_albsg" src="https://github.com/user-attachments/assets/6bf72655-af59-454f-bc39-20295146a01f" />
+<img width="1431" height="717" alt="aws_albsg" src="https://github.com/user-attachments/assets/d0e0ffc5-3db8-4217-bde8-0996427b180c" />
 
 ---
 
@@ -84,13 +79,9 @@ I created a separate Security Group for the EC2 instances.
 
 The EC2 Security Group only allows HTTP traffic from the ALB Security Group.
 
-| Type | Port | Source             |
-| ---- | ---: | ------------------ |
-| HTTP |   80 | ALB Security Group |
-
 This keeps the EC2 instances from being directly accessible over HTTP from the internet.
 
-<img width="1432" height="722" alt="aws_alb_ec2_albsg" src="https://github.com/user-attachments/assets/1a4fc2af-7172-4f75-8167-6c5f71ed2a1f" />
+<img width="1432" height="722" alt="aws_alb_ec2_albsg" src="https://github.com/user-attachments/assets/2f0a8b3e-dc41-41ce-9738-26a721025045" />
 
 ---
 
@@ -126,6 +117,9 @@ The ALB configuration was:
 
 I configured the HTTP listener to forward requests to the EC2 Target Group.
 
+<img width="1437" height="718" alt="aws_alb" src="https://github.com/user-attachments/assets/1fc1ab0c-b847-49e3-a3a5-a5ae674ab3a7" />
+<img width="1434" height="724" alt="aws_alb_2" src="https://github.com/user-attachments/assets/06b1a4a4-9d3a-418e-b062-890dd023f9ff" />
+
 ---
 
 ## Step 6 - Check Target Health
@@ -134,17 +128,15 @@ After creating the ALB, I checked the Target Group to make sure both EC2 instanc
 
 The health check configuration was:
 
-```text
-Protocol: HTTP
-Port: 80
-Path: /
-```
+* Protocol: HTTP
+* Port: 80
+* Path: /
 
-Both EC2 instances registered successfully and showed as **Healthy**.
+Both EC2 instances registered successfully and showed as healthy.
 
 If an instance becomes unhealthy, the ALB will stop sending normal traffic to that instance.
 
-<img width="1440" height="900" alt="aws_tg_healthy" src="https://github.com/user-attachments/assets/2ab20f82-dd60-4192-a66f-a3f45f103b4d" />
+<img width="1436" height="627" alt="aws_tg_healthy" src="https://github.com/user-attachments/assets/17e7271d-6b02-4ccf-a61d-523d173ef530" />
 
 ---
 
@@ -152,24 +144,12 @@ If an instance becomes unhealthy, the ALB will stop sending normal traffic to th
 
 I used the ALB DNS name to access the application in a web browser.
 
-The response could show:
-
-```text
-Hello from WebServer-1
-```
-
-or:
-
-```text
-Hello from WebServer-2
-```
-
 After refreshing the page, the request could be handled by the other EC2 instance.
 
 This confirmed that the ALB was forwarding requests to the two EC2 instances.
 
-<img width="1440" height="900" alt="aws_ec2server1" src="https://github.com/user-attachments/assets/8951e376-69de-4db8-a5d4-0c9d72ceb0f6" />
-<img width="1440" height="900" alt="aws_ec2server2" src="https://github.com/user-attachments/assets/162ca21a-d13b-4107-9729-d08eb3545c99" />
+<img width="1440" height="900" alt="aws_ec2server1" src="https://github.com/user-attachments/assets/7967c3c1-8c17-4417-b472-ccd9673699dd" />
+<img width="1440" height="900" alt="aws_ec2server2" src="https://github.com/user-attachments/assets/e1c43a39-8123-4ddc-8446-2a91a5867a7e" />
 
 ---
 
@@ -220,7 +200,7 @@ The ALB successfully forwarded traffic to the healthy EC2 instances.
 
 ---
 
-## AWS Services
+## AWS Services used
 
 * Amazon EC2
 * Application Load Balancer
