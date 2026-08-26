@@ -79,20 +79,18 @@ The private subnet is used for resources that should not be directly accessible 
 
 # Step 2 - Create Internet Gateway
 
-I created an Internet Gateway named:
+I created an Internet Gateway named:lab-igw
 
-```text
-lab-igw
-```
 
 I then attached the Internet Gateway to my custom VPC.
 
 The Internet Gateway allows resources in the public subnet to communicate with the internet when the correct routing and public IP configuration are in place.
 
-<img width="1435" height="754" alt="01-internet-gateway-attached" src="https://github.com/user-attachments/assets/2890cfb9-7382-4966-a3bc-5a9a71478766" />
+<img width="1430" height="672" alt="01-internet-gateway-attached" src="https://github.com/user-attachments/assets/067aaf18-ccdf-4789-9369-1af46b4d1374" />
 
 
-The screenshot shows the Internet Gateway `lab-igw` in an attached state.
+
+The screenshot shows the Internet Gateway lab-igw in an attached state.
 
 ---
 
