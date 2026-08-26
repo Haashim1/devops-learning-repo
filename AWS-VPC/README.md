@@ -187,7 +187,7 @@ The private EC2 instance cannot be directly accessed from the public internet.
 
 I configured Security Groups to control network access between the EC2 instances and the internet.
 
-## Public EC2 Security Group
+# Public EC2 Security Group
 
 The public EC2 Security Group allows:
 
@@ -196,7 +196,7 @@ The public EC2 Security Group allows:
 
 SSH access was restricted to my own IP rather than allowing access from anywhere.
 
-## Private EC2 Security Group
+# Private EC2 Security Group
 
 The private EC2 Security Group only allows internal access.
 
@@ -209,7 +209,8 @@ Public EC2 Security Group
 ```
 
 This prevents the private instance from being directly accessed from the public internet.
-<img width="1440" height="747" alt="07-public-sg-inbound-rules" src="https://github.com/user-attachments/assets/474d52b3-0d78-41ad-ab20-b80b9796abcf" />
+
+<img width="1432" height="670" alt="07-public-sg-inbound-rules" src="https://github.com/user-attachments/assets/d6b8914e-7a9a-4eed-9127-7cffa64dfb73" />
 
 ---
 
